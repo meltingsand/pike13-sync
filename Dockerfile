@@ -1,3 +1,5 @@
+FROM node:18-alpine
+
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
 
