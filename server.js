@@ -59,7 +59,6 @@ function validatePike13Signature(payload, signature) {
   );
 }
 
-// Transform Pike13 person data to HighLevel format
 function transformPersonData(pike13Person) {
   return {
     firstName: pike13Person.first_name,
@@ -72,7 +71,8 @@ function transformPersonData(pike13Person) {
       pike13_joined_at: pike13Person.joined_at,
       pike13_is_member: pike13Person.is_member,
       pike13_location: pike13Person.location?.name,
-      pike13_timezone: pike13Person.timezone
+      pike13_timezone: pike13Person.timezone,
+      pike13_birthdate: pike13Person.birthdate
     },
     source: 'Pike13 Integration'
   };
