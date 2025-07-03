@@ -78,12 +78,16 @@ function transformPersonData(pike13Person) {
   };
 }
 
-// Transform Pike13 visit data to HighLevel format
 function transformVisitData(pike13Visit) {
   const eventOccurrence = pike13Visit.event_occurrence;
+  const person = pike13Visit.person;
   
   return {
-    contactId: pike13Visit.person?.id?.toString(),
+    contactId: person?.id?.toString(),
+    firstName: person?.first_name,
+    lastName: person?.last_name,
+    email: person?.email,
+    phone: person?.phone,
     title: eventOccurrence?.name || 'Pike13 Class',
     appointmentStatus: pike13Visit.state === 'completed' ? 'confirmed' : 'new',
     startTime: eventOccurrence?.start_at,
