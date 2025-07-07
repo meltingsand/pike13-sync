@@ -60,6 +60,9 @@ function validatePike13Signature(payload, signature) {
 }
 
 function transformPersonData(pike13Person) {
+  // Determine client status
+  const clientStatus = pike13Person.deleted_at ? 'Deleted' : 'Active';
+  
   return {
     firstName: pike13Person.first_name,
     lastName: pike13Person.last_name,
@@ -72,34 +75,39 @@ function transformPersonData(pike13Person) {
       pike13_is_member: pike13Person.is_member,
       pike13_location: pike13Person.location?.name,
       pike13_timezone: pike13Person.timezone,
-      pike13_birthdate: pike13Person.birthdate
+      pike13_birthdate: pike13Person.birthdate,
+      pike13_client_status: clientStatus,
+      pike13_primary_staff: pike13Person.primary_staff_member?.name,
+      pike13_session_count: 0,
+      pike13_lifetime_value: 0
     },
     source: 'Pike13 Integration'
   };
 }
 
-function transformVisitData(pike13Visit) {
-  const eventOccurrence = pike13Visit.event_occurrence;
-  const person = pike13Visit.person;
+function transformPersonData(pike13Person) {
+  // Determine client status
+  const clientStatus = pike13Person.deleted_at ? 'Deleted' : 'Active';
   
   return {
-    contactId: person?.id?.toString(),
-    firstName: person?.first_name,
-    lastName: person?.last_name,
-    email: person?.email,
-    phone: person?.phone,
-    title: eventOccurrence?.name || 'Pike13 Class',
-    appointmentStatus: pike13Visit.state === 'completed' ? 'confirmed' : 'new',
-    startTime: eventOccurrence?.start_at,
-    endTime: eventOccurrence?.end_at,
-    notes: `Pike13 Visit ID: ${pike13Visit.id}\nService: ${eventOccurrence?.service_name}\nLocation: ${eventOccurrence?.location?.name}`,
+    firstName: pike13Person.first_name,
+    lastName: pike13Person.last_name,
+    email: pike13Person.email,
+    phone: pike13Person.phone,
+    tags: ['pike13-client'],
     customFields: {
-      pike13_visit_id: pike13Visit.id.toString(),
-      pike13_event_id: eventOccurrence?.event_id?.toString(),
-      pike13_service_type: eventOccurrence?.service_type,
-      pike13_visit_state: pike13Visit.state,
-      pike13_paid: pike13Visit.paid
-    }
+      pike13_id: pike13Person.id.toString(),
+      pike13_joined_at: pike13Person.joined_at,
+      pike13_is_member: pike13Person.is_member,
+      pike13_location: pike13Person.location?.name,
+      pike13_timezone: pike13Person.timezone,
+      pike13_birthdate: pike13Person.birthdate,
+      pike13_client_status: clientStatus,
+      pike13_primary_staff: pike13Person.primary_staff_member?.name,
+      pike13_session_count: 0,
+      pike13_lifetime_value: 0
+    },
+    source: 'Pike13 Integration'
   };
 }
 
@@ -124,6 +132,9 @@ function transformInvoiceData(pike13Invoice) {
 function transformTransactionData(pike13Transaction) {
   return {
     contactId: pike13Transaction.invoice?.person?.id?.toString(),
+    firstName: pike13Transaction.invoice?.person?.first_name,
+    lastName: pike13Transaction.invoice?.person?.last_name,
+    email: pike13Transaction.invoice?.person?.email,
     amount: pike13Transaction.amount_cents / 100,
     currency: pike13Transaction.currency_code,
     paymentType: pike13Transaction.payment_type,
@@ -133,7 +144,9 @@ function transformTransactionData(pike13Transaction) {
       pike13_transaction_id: pike13Transaction.id.toString(),
       pike13_invoice_id: pike13Transaction.invoice_id?.toString(),
       pike13_payment_type: pike13Transaction.payment_type,
-      pike13_settled: pike13Transaction.settled,
+      pike13_payment_status: pike13Transaction.state,
+      pike13_payment_settled: pike13Transaction.settled,
+      pike13_payment_amount: pike13Transaction.amount_cents / 100,
       pike13_external_transaction_id: pike13Transaction.external_transaction_id
     }
   };
