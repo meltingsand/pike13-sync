@@ -78,6 +78,8 @@ function transformPersonData(pike13Person) {
       pike13_birthdate: pike13Person.birthdate,
       pike13_client_status: clientStatus,
       pike13_primary_staff: pike13Person.primary_staff_member?.name,
+      pike13_guardian_name: pike13Person.guardian_name,
+      pike13_guardian_email: pike13Person.guardian_email,
       pike13_session_count: 0,
       pike13_lifetime_value: 0
     },
