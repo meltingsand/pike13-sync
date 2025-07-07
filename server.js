@@ -87,29 +87,37 @@ function transformPersonData(pike13Person) {
   };
 }
 
-function transformPersonData(pike13Person) {
-  // Determine client status
-  const clientStatus = pike13Person.deleted_at ? 'Deleted' : 'Active';
-  
+// Transform Pike13 visit data to HighLevel format
+function transformVisitData(pike13Visit) {
+  const eventOccurrence = pike13Visit.event_occurrence;
+  const person = pike13Visit.person;
+
+  // Calculate days since this visit (will be 0 for current visit)
+  const visitDate = new Date(eventOccurrence?.start_at);
+  const today = new Date();
+  const daysSinceVisit = Math.floor((today - visitDate) / (1000 * 60 * 60 * 24));
+
   return {
-    firstName: pike13Person.first_name,
-    lastName: pike13Person.last_name,
-    email: pike13Person.email,
-    phone: pike13Person.phone,
-    tags: ['pike13-client'],
+    contactId: person?.id?.toString(),
+    firstName: person?.first_name,
+    lastName: person?.last_name,
+    email: person?.email,
+    phone: person?.phone,
+    title: eventOccurrence?.name || 'Pike13 Class',
+    appointmentStatus: pike13Visit.state === 'completed' ? 'confirmed' : 'new',
+    startTime: eventOccurrence?.start_at,
+    endTime: eventOccurrence?.end_at,
+    notes: `Pike13 Visit ID: ${pike13Visit.id}\nService: ${eventOccurrence?.service_name}\nLocation: ${eventOccurrence?.location?.name}`,
     customFields: {
-      pike13_id: pike13Person.id.toString(),
-      pike13_joined_at: pike13Person.joined_at,
-      pike13_is_member: pike13Person.is_member,
-      pike13_location: pike13Person.location?.name,
-      pike13_timezone: pike13Person.timezone,
-      pike13_birthdate: pike13Person.birthdate,
-      pike13_client_status: clientStatus,
-      pike13_primary_staff: pike13Person.primary_staff_member?.name,
-      pike13_session_count: 0,
-      pike13_lifetime_value: 0
-    },
-    source: 'Pike13 Integration'
+      pike13_visit_id: pike13Visit.id.toString(),
+      pike13_event_id: eventOccurrence?.event_id?.toString(),
+      pike13_service_type: eventOccurrence?.service_type,
+      pike13_visit_state: pike13Visit.state,
+      pike13_paid: pike13Visit.paid,
+      pike13_last_visit_date: eventOccurrence?.start_at,
+      pike13_last_visit_service: eventOccurrence?.service_name,
+      pike13_days_since_last_visit: daysSinceVisit
+    }
   };
 }
 
